@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>اختبار سرعة الكتابة</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Tajawal:wght@400;700&display=swap');
+        body {
+            font-family: 'Tajawal', Arial, sans-serif;
+            text-align: center;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: #333;
+            line-height: 1.6;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+        }
+
+        .container {
+            width: 90%;
+            max-width: 1200px;
+            background-color: rgba(255, 255, 255, 0.9);
+            border-radius: 20px;
+            padding: 40px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+            backdrop-filter: blur(10px);
+            transition: transform 0.3s ease;
+        }
+
+        .container:hover {
+            transform: translateY(-5px);
+        }
+
+        h1 {
+            color: #4a4a4a;
+            margin-bottom: 20px;
+            font-size: 28px;
+            text-shadow: 1px 1px 2px rgba(0,0,0,0.1);
+        }
+
+        #timerLabel {
+            font-size: 48px;
+            color: #e74c3c;
+            margin-bottom: 20px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.1);
+        }
+
+        #resetButton {
+            background: linear-gradient(to right, #3498db, #2980b9);
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            font-size: 18px;
+            border-radius: 30px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        #resetButton:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 8px rgba(0, 0, 0, 0.15);
+        }
+
+        .input-group {
+            margin: 20px 0;
+        }
+
+        #minutesInput {
+            width: 60px;
+            font-size: 18px;
+            padding: 8px;
+            border: 2px solid #bdc3c7;
+            border-radius: 10px;
+            text-align: center;
+            transition: border-color 0.3s;
+        }
+
+        #minutesInput:focus {
+            outline: none;
+            border-color: #3498db;
+        }
+
+        #wordCountLabel {
+            font-size: 22px;
+            color: #27ae60;
+            margin-bottom: 10px;
+            font-weight: bold;
+        }
+
+        #textToType {
+            width: 100%;
+            height: 200px;
+            padding: 20px;
+            font-size: 18px;
+            color: red;
+            border: 2px solid #bdc3c7;
+            border-radius: 15px;
+            resize: vertical;
+            transition: all 0.3s ease;
+            box-sizing: border-box;
+            box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.1);
+            margin-bottom: 15px;
+        }
+
+        #textEdit {
+            width: 100%;
+            height: 200px;
+            padding: 20px;
+            font-size: 18px;
+            border: 2px solid #bdc3c7;
+            border-radius: 15px;
+            resize: vertical;
+            transition: all 0.3s ease;
+            box-sizing: border-box;
+            box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        #textEdit:focus {
+            outline: none;
+            border-color: #3498db;
+            box-shadow: inset 0 2px 4px rgba(52, 152, 219, 0.3);
+        }
+
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+            100% { transform: scale(1); }
+        }
+
+        .pulse {
+            animation: pulse 2s infinite;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>اختبار سرعة الطباعة</h1>
+        <div id="timerLabel" class="pulse">00:00</div>
+        <button id="resetButton" onclick="resetTimer()">إعادة المحاولة</button>
+        <div class="input-group">
+            <label for="minutesInput">عدد الدقائق:</label>
+            <input type="number" id="minutesInput" value="1" min="1" step="1">
+        </div>
+        <div id="wordCountLabel">عدد الكلمات: 0</div>
+        <textarea id="textToType" placeholder="اكتب النص الذي تريد التدرب عليه هنا..."></textarea>
+        <textarea id="textEdit" oninput="textChanged()" placeholder="ابدأ الكتابة هنا..."></textarea>
+    </div>
+
+    <script>
+        let typingStarted = false;
+        let timer = 0;
+        let wordCount = 0;
+
+        function updateTimer() {
+            if (typingStarted) {
+                const currentTime = Math.floor((Date.now() - timer) / 1000);
+                const minutes = Math.floor(currentTime / 60);
+                const seconds = currentTime % 60;
+                document.getElementById("timerLabel").textContent = `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+
+                const minutesInput = parseInt(document.getElementById("minutesInput").value);
+                if (currentTime >= minutesInput * 60) {
+                    typingStarted = false;
+                    document.getElementById("wordCountLabel").textContent = `عدد الكلمات: ${wordCount}`;
+                    document.getElementById("textEdit").readOnly = true;
+                    document.getElementById("textEdit").style.backgroundColor = "rgba(240, 240, 240, 0.5)";
+                    document.getElementById("timerLabel").classList.remove("pulse");
+                }
+            }
+
+            setTimeout(updateTimer, 1000);
+        }
+
+        function textChanged() {
+            if (!typingStarted) {
+                typingStarted = true;
+                timer = Date.now();
+                document.getElementById("timerLabel").classList.add("pulse");
+            }
+
+            const text = document.getElementById("textEdit").value;
+            const words = text.trim().split(/\s+/);
+            wordCount = words.filter(word => word.length > 0).length;
+            document.getElementById("wordCountLabel").textContent = `عدد الكلمات: ${wordCount}`;
+        }
+
+        function resetTimer() {
+            typingStarted = false;
+            timer = 0;
+            wordCount = 0;
+            document.getElementById("timerLabel").textContent = "00:00";
+            document.getElementById("wordCountLabel").textContent = "عدد الكلمات: 0";
+            document.getElementById("textEdit").value = "";
+            document.getElementById("textEdit").readOnly = false;
+            document.getElementById("textEdit").style.backgroundColor = "white";
+            document.getElementById("timerLabel").classList.remove("pulse");
+        }
+
+        updateTimer();
+    </script>
+</body>
+</html>
